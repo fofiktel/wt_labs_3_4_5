@@ -1,3 +1,5 @@
+import shutil
+
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view
@@ -19,25 +21,52 @@ def catalog_content(request):
 
 @api_view(['GET'])
 def create_catalog(request):
-    catalog_name = request.GET.get('catalog_name')
-    if not os.path.exists(ROOT_PATH+catalog_name):
-        os.makedirs(ROOT_PATH+catalog_name)
+    name = request.GET.get('name')
+    if not os.path.exists(ROOT_PATH + name):
+        os.makedirs(ROOT_PATH + name)
         return Response("OK")
     return Response("Already exist")
 
 
 @api_view(['GET'])
 def rename_catalog(request):
-    catalog_name = request.GET.get('catalog_name')
+    name = request.GET.get('name')
     new_name = request.GET.get('new_name')
 
-    if os.path.exists(ROOT_PATH + catalog_name):
-        os.rename(ROOT_PATH + catalog_name,ROOT_PATH + new_name)
+    if os.path.exists(ROOT_PATH + name):
+        os.rename(ROOT_PATH + name, ROOT_PATH + new_name)
         return Response("OK")
     return Response("Doesn't exist")
 
-# @api_view(['GET'])
-# def delete_catalog(request):
-#     catalog_name = request.GET.get('catalog_name')
-#     if os.path.exists(ROOT_PATH + catalog_name):
-#
+@api_view(['GET'])
+def delete_catalog(request):
+    name = request.GET.get('name')
+    if os.path.exists(ROOT_PATH + name):
+        shutil.rmtree(ROOT_PATH + name)
+        return Response("OK")
+    return Response("Doesn't exist")
+
+@api_view(['GET'])
+def copy_file(request):
+    copy_from = ROOT_PATH + request.GET.get('from')
+    copy_to = ROOT_PATH + request.GET.get('to')
+
+    if os.path.exists(copy_from) and os.path.exists(copy_to):
+        shutil.copy(copy_from, copy_to)
+        return Response("OK")
+    return Response("Doesn't exist")
+
+
+@api_view(['GET'])
+def read_file(request):
+    name = request.GET.get('name')
+    if os.path.exists(ROOT_PATH+name):
+        with open(ROOT_PATH+name) as file:
+            str = file.read()
+        return Response(str)
+    return Response("Doesn't exist")
+
+
+
+
+
